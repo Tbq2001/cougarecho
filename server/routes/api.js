@@ -25,7 +25,47 @@ router.get("/test", (req, res) => {
   res.json([{ "test": "hello world!" }])
 });
 // Begin Josh Lewis
+//Search 
+router.get('/search', async (req, res) => {
+  const { keyword = '', type = 'all' } = req.query;
+  
+  if (!keyword.trim()) {
+    return res.status(400).json({ message: 'Keyword is required.' });
+  }
 
+  try {
+    const pool = await getConnectionPool(); // Connect to the database
+    let query = '';
+    let result = { music: [], artists: [] };
+    
+    if (type === 'all' || type === 'music') {
+      // Search for songs with the keyword in the title
+      query = `SELECT song_id, song_name AS title, artist_id 
+               FROM Song 
+               WHERE song_name LIKE @keyword`;
+      const musicRequest = pool.request();
+      musicRequest.input('keyword', sql.NVarChar, `%${keyword}%`);
+      const musicResult = await musicRequest.query(query);
+      result.music = musicResult.recordset;
+    }
+
+    if (type === 'all' || type === 'artist') {
+      // Search for artists with the keyword in their name
+      query = `SELECT artist_id, name AS artist 
+               FROM Artist 
+               WHERE name LIKE @keyword`;
+      const artistRequest = pool.request();
+      artistRequest.input('keyword', sql.NVarChar, `%${keyword}%`);
+      const artistResult = await artistRequest.query(query);
+      result.artists = artistResult.recordset;
+    }
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching search results:', error);
+    res.status(500).send('Server error');
+  }
+});
 // Connection is successfull
 router.post("/artist/profile/update", async (req, res) => {
   try {

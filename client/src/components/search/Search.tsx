@@ -19,11 +19,6 @@ const SearchPage: React.FC = () => {
   const [results, setResults] = useState<SearchResults>({ music: [], artists: [] });
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [recentSearches, setRecentSearches] = useState<MusicItem[]>([
-    { title: 'TBH', artist: 'PartyNextDoor', song_id: '1', artist_id: 'a1', album_id: 'alb1' },
-    { title: 'Gasoline', artist: 'The Weeknd', song_id: '2', artist_id: 'a2', album_id: 'alb2' },
-    { title: 'Too Fast', artist: 'Sonder', song_id: '3', artist_id: 'a3', album_id: 'alb3' },
-  ]);
   const [isMenuExpanded, setIsMenuExpanded] = useState(false);
 
   const searchKeyword = searchParams.get('keyword') || '';
@@ -36,20 +31,12 @@ const SearchPage: React.FC = () => {
     }
 
     try {
-      // Updated to include song_id, artist_id, and album_id in the search
-      const response = await fetch(`http://localhost:3001/search?keyword=${searchKeyword}&type=${searchType}`);
+      // Updated backend endpoint to fetch search results based on keyword
+      const response = await fetch(`http://localhost:5001/api/search?keyword=${searchKeyword}&type=${searchType}`);
       const data = await response.json();
       setResults({
-        music: data.music.map((item: MusicItem) => ({
-          ...item,
-          song_id: item.song_id || `song-${Math.random()}`,
-          artist_id: item.artist_id,
-          album_id: item.album_id
-        })),
-        artists: data.artists.map((item: MusicItem) => ({
-          ...item,
-          artist_id: item.artist_id || `artist-${Math.random()}`
-        }))
+        music: data.music,
+        artists: data.artists
       });
     } catch (error) {
       console.error('Error fetching search results:', error);
@@ -128,7 +115,6 @@ const SearchPage: React.FC = () => {
           </div>
         </div>
       )}
-
       {/* Main content */}
       <div className="flex-1 flex flex-col p-8 overflow-y-auto">
         {/* Top bar */}
@@ -152,23 +138,6 @@ const SearchPage: React.FC = () => {
             <Link to="/useredit" className="text-[#1ED760] hover:text-white">
               <Settings className="w-6 h-6" />
             </Link>
-          </div>
-        </div>
-
-        {/* Recent Searches */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Recent Searches</h2>
-          <div className="grid grid-cols-3 gap-4">
-            {recentSearches.map((item) => (
-              <div 
-                key={item.song_id} 
-                className="bg-[#2A2A2A] p-4 rounded-lg cursor-pointer hover:bg-[#3A3A3A] transition-colors"
-                onClick={() => handleSongClick(item.song_id!)}
-              >
-                <p className="font-semibold">{item.title}</p>
-                <p className="text-sm text-gray-400">{item.artist}</p>
-              </div>
-            ))}
           </div>
         </div>
 
