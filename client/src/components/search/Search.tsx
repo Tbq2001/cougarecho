@@ -6,8 +6,9 @@ interface MusicItem {
   song_id?: string;
   artist_id?: string;
   album_id?: string;
-  title: string;
-  artist: string;
+  song_name: string;
+  artist_name: string;
+  duration: string; // Add duration field to the MusicItem interface
 }
 
 interface SearchResults {
@@ -31,12 +32,14 @@ const SearchPage: React.FC = () => {
     }
 
     try {
-      // Updated backend endpoint to fetch search results based on keyword
-      const response = await fetch(`http://localhost:5001/api/search?keyword=${searchKeyword}&type=${searchType}`);
+      // Fetch search results from your backend API
+      const response = await fetch(`http://localhost:5001/api/songs?keyword=${searchKeyword}`);
       const data = await response.json();
+
+      // Assuming the API returns an array of songs with name and duration
       setResults({
-        music: data.music,
-        artists: data.artists
+        music: data, // Replace with data from your backend
+        artists: []  // If your API doesn't return artists, you can leave this empty
       });
     } catch (error) {
       console.error('Error fetching search results:', error);
@@ -86,35 +89,6 @@ const SearchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Expandable Menu */}
-      {isMenuExpanded && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50">
-          <div className="bg-[#121212] w-64 h-full p-4">
-            <button onClick={() => setIsMenuExpanded(false)} className="mb-8 text-[#1ED760]">
-              <X className="w-6 h-6" />
-            </button>
-            <nav>
-              <ul className="space-y-4">
-                <li><Link to="/homepage" className="text-[#EBE7CD] hover:text-[#1ED760] flex items-center"><Home className="w-5 h-5 mr-3" /> Home</Link></li>
-                <li><Link to="/search" className="text-[#EBE7CD] hover:text-[#1ED760] flex items-center"><Search className="w-5 h-5 mr-3" /> Search</Link></li>
-                <li><Link to="/userlibrary" className="text-[#EBE7CD] hover:text-[#1ED760] flex items-center"><Music className="w-5 h-5 mr-3" /> Your Library</Link></li>
-                <li><Link to="/newplaylist" className="text-[#EBE7CD] hover:text-[#1ED760] flex items-center"><PlusCircle className="w-5 h-5 mr-3" /> Create Playlist</Link></li>
-              </ul>
-            </nav>
-            <div className="mt-auto">
-              <Link to="/useredit" className="text-[#EBE7CD] hover:text-[#1ED760] flex items-center mt-4">
-                <User className="w-5 h-5 mr-3" /> Profile
-              </Link>
-              <button 
-                onClick={handleLogout}
-                className="text-[#EBE7CD] hover:text-[#1ED760] flex items-center mt-4"
-              >
-                <LogOut className="w-5 h-5 mr-3" /> Log out
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       {/* Main content */}
       <div className="flex-1 flex flex-col p-8 overflow-y-auto">
         {/* Top bar */}
@@ -144,7 +118,7 @@ const SearchPage: React.FC = () => {
         {/* Search Results */}
         {searchKeyword && (
           <div>
-            {(searchType === 'all' || searchType === 'music') && results.music.length > 0 && (
+            {results.music.length > 0 && (
               <div className="mb-6">
                 <h3 className="text-xl font-semibold mb-3">Songs</h3>
                 <div className="grid grid-cols-1 gap-2">
@@ -155,30 +129,18 @@ const SearchPage: React.FC = () => {
                       onClick={() => handleSongClick(item.song_id!)}
                     >
                       <Play className="w-4 h-4 mr-3 text-gray-400" />
-                      <div>
-                        <p className="font-semibold">{item.title}</p>
+                      <div className="flex-grow">
+                        <p className="font-semibold">{item.song_name}</p>
                         <p className="text-sm text-gray-400">{item.artist}</p>
                       </div>
+                      <p className="text-sm text-gray-400">{item.duration}</p> {/* Display song duration */}
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {(searchType === 'all' || searchType === 'artist') && results.artists.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-xl font-semibold mb-3">Artists</h3>
-                <div className="grid grid-cols-1 gap-2">
-                  {results.artists.map((item) => (
-                    <div key={item.artist_id} className="bg-[#2A2A2A] p-3 rounded-lg">
-                      <p className="font-semibold">{item.artist}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {results.music.length === 0 && results.artists.length === 0 && (
+            {results.music.length === 0 && (
               <p className="text-center text-gray-400">No results found</p>
             )}
           </div>
