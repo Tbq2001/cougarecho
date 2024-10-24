@@ -77,8 +77,8 @@ const SearchPage: React.FC = () => {
         </div>
         <div className="flex-grow"></div>
         <div className="mt-auto flex flex-col items-center space-y-4 mb-4">
-          <button onClick={handleCreatePlaylist} className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-[#EBE7CD] hover:text-white" aria-label="Add">
-            <PlusCircle className="w-6 h-6" />
+          <button onClick={handleCreatePlaylist} className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-white hover:text-white" aria-label="Add">
+            <PlusCircle className="w-6 h-6 text-white" />
           </button>
           <Link to="/useredit" aria-label="User Profile" className="text-[#1ED760] hover:text-white">
             <User className="w-6 h-6" />
